@@ -3,6 +3,9 @@ This is an IBM 704 Emulator designed to be run on a Raspberry Pi. Specifically, 
 https://bitsavers.org/pdf/ibm/704/24-6661-2_704_Manual_1955.pdf
 
 Steps:
-Implement IBM 704 architecture + instruction set
-Implement IBM 704 IO with Raspberry Pi
-Implement code to simulate IBM 704 operator console using raspberry pi
+
+-Implement IBM 704 architecture + instruction set
+
+-Implement IBM 704 IO with Raspberry Pi
+
+-Implement code to simulate IBM 704 operator console using raspberry pi
