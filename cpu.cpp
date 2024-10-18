@@ -324,15 +324,16 @@ class centralProcessingUnit
     the computer proceeds to the next instruction with the divide-check flag to true*/
     void DVP(uint15 y){
         uint36 cy = core[y];
-        if (uint36_sign(cy) <= uint36_sign(rgstrs.ac)){
+        if (clearKthBit(cy,35) <= clearKthBit(rgstrs.ac,37)){
             flags.dcflag = true;
             flags.haltFlag = false;
             return;
         }
-        __int128_t dividend = clearKthBit((rgstrs.ac << 35) + clearKthBit(rgstrs.mq,35),73) * (getKthBit(rgstrs.ac,37) ? -1 : 1);
-        int64_t divisor = uint36_sign(cy);
-        uint36 q = int36_unsign((int) dividend/divisor); //Quotient
-        uint36 r = (dividend % divisor); //Remainder
+        bool neg = (getKthBit(rgstrs.ac,37) != getKthBit(cy,35)); //Is result negive
+        __uint128_t dividend = (clearKthBit(rgstrs.ac,37) | lshft35) - lshft35 + clearKthBit(rgstrs.mq,35);
+        int64_t divisor = clearKthBit(cy,35);
+        uint36 q = (uint36)(dividend/divisor) + (neg ? lshft35 : 0); //Quotient
+        uint36 r = (uint36)(dividend % divisor) + (neg ? lshft37 : 0); //Remainder
         rgstrs.ac = r;
         rgstrs.mq = q;
     }
