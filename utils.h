@@ -31,14 +31,12 @@ inline uint64_t toggleKthBit(uint64_t n, int k){
     return n ^ ((uint64_t)1 << k);
 }
 
-/*absolute value of int128*/
-__uint128_t abs128(__int128_t x);
 /*Translates unsigned 36-bit integer to signed 35-bit integer*/
-int64_t uint36_sign(uint36 n);
+extern int64_t uint36_sign(uint36 n);
 /*Translates signed 2s-complement 35-bit integer to unsigned 36 bit integer*/
-uint36 int36_unsign(int64_t n);
+extern uint36 int36_unsign(int64_t n);
 /*Adds two uint36s, returns another uint36 with properly formatted sign*/
-uint36 uint36_add(uint36 a, uint36 b);
+extern uint36 uint36_add(uint36 a, uint36 b);
 
 #endif
 
