@@ -92,6 +92,13 @@ class centralProcessingUnit
         cout << "TEST0: 50+(-20)=" << rgstrs.ac << std::endl;
     }
 
+    /*Tests bitwise operations*/
+    void kbitTest(){
+        //gKthBitTest
+        uint36 testWord = 0b110101101101001001001011101011010110;
+        cout << getKthBit(testWord,11) << getKthBit(testWord,10) << getKthBit(testWord,9) << getKthBit(testWord,8) << getKthBit(testWord,7) << getKthBit(testWord,6) << getKthBit(testWord,5) << getKthBit(testWord,4) << getKthBit(testWord,3) << getKthBit(testWord,2) << getKthBit(testWord,1) << getKthBit(testWord,0) << std::endl; //Should print "10"
+    }
+
     private:
     const std::string drumName = "drum.bin"; //Name of the drum storage file
     registers rgstrs = {
@@ -193,7 +200,6 @@ class centralProcessingUnit
     }
 
     /*
-    Arithmetic & Load/Store instructions
     Shorthand cheat sheet:
     y = the address
     ac = the accumulator
@@ -205,6 +211,8 @@ class centralProcessingUnit
     cmq = the value of the MQ register
     csr = the value of the Storage register
     */
+
+    /*Load/Store Instructions*/
 
     /*Stores cy in ac. Octal: +0500 Y*/
     void CLA(uint15 y) {
@@ -229,7 +237,25 @@ class centralProcessingUnit
         core[y] = rgstrs.mq;
     }
 
-    /*Adds cy to cac, stores the sum in ac. Octal: +0400 Y*/
+    /*Replaces the 18 most significant bits of cy with the 18 most significant bits of cmq. Octal: -0620*/
+    void SLQ(uint15 y){
+        uint36 cy = core[y];
+        uint36 cmqS1_17 = rgstrs.mq/((uint36)1 << 18);
+        cy %= ((uint36)1 << 18);
+        core[y] = cmqS1_17 | cy;
+    }
+
+    /*Replaces cy(S,1-2) with cac (P,1-2). Octal: +0630*/
+    void STP(uint15 y){
+        uint36 cy3_36 = core[y] / ((uint36)1 << 33);
+        uint36 cacPref = getKthBit(rgstrs.ac,35)*4 + getKthBit(rgstrs.ac,34)*2 + getKthBit(rgstrs.ac,33);
+        core[y] = cacPref | cy3_36;
+    }
+
+
+    /*Fixed-Point Arithmetic Instructions*/
+
+    /*Adds cy to cac, stores the sum in ac. Octal: +0400*/
     void ADD(uint15 y) {
         uint36 cy = core[y];
         if (getKthBit(cy,35)) {
@@ -304,7 +330,7 @@ class centralProcessingUnit
     If cy > cac, division takes place, and the 35-bit signed quotient is stored in mq,
     while the 35-bit signed remainder is stored in ac. The sign of the remainder always
     agrees with the sign of the quotient. If cy <= cac, division does not take place and
-    the computer halts and sets the divide-check flag to true*/
+    the computer halts and sets the divide-check flag to true. Octal: +0220*/
     void DVH(uint15 y){
         uint36 cy = core[y];
         if (clearKthBit(cy,35) <= clearKthBit(rgstrs.ac,37)){
@@ -321,11 +347,11 @@ class centralProcessingUnit
         rgstrs.mq = q;
     }
 
-    /*Appends cmq to cac to form a 72-bit dividend with sign, treats cy as the divisor. 
+    /*Uses cmq and cac as a 72-bit dividend with sign, treats cy as the divisor. 
     If cy > cac, division takes place, and the 35-bit signed quotient is stored in mq,
     while the 35-bit signed remainder is stored in ac. The sign of the remainder always
-    agrees with the sign of the quotient. If cy <= cac, division does not take place and
-    the computer proceeds to the next instruction with the divide-check flag to true*/
+    agrees with the sign of the quotient. If cy <= cac, division does not take place andds
+    the computer proceeds to the next instruction with the divide-check flag to true. Octal: +0221*/
     void DVP(uint15 y){
         uint36 cy = core[y];
         if (clearKthBit(cy,35) <= clearKthBit(rgstrs.ac,37)){
@@ -342,10 +368,13 @@ class centralProcessingUnit
         rgstrs.mq = q;
     }
 
+
+
 };
 
 int main(){
     centralProcessingUnit cpu = centralProcessingUnit(true);
     cpu.FiPA_Test1();
     cpu.NegTest1();
+    cpu.kbitTest();
 }
