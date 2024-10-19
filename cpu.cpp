@@ -204,10 +204,6 @@ class centralProcessingUnit
     cac = the value of the accumulator
     cmq = the value of the MQ register
     csr = the value of the Storage register
-
-    return codes:
-    0 = Successful Execution
-    1 = Halt
     */
 
     /*Stores cy in ac. Octal: +0500 Y*/
