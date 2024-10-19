@@ -1,10 +1,7 @@
 #include <iostream>
 #include <cstdint>
-#include <sstream>
-#include <vector>
 #include <fstream>
 #include <cmath>
-#include <algorithm>
 #include "utils.h"
 
 using std::cin;
