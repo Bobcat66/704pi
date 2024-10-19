@@ -1,7 +1,5 @@
-
-
-#ifndef HEADER_FILE_NAME
-#define HEADER_FILE_NAME
+#ifndef UTILS_H
+#define UTILS_H
 
 #include <cstdint>
 

@@ -5,7 +5,7 @@
 #include <fstream>
 #include <cmath>
 #include <algorithm>
-#include "704utils.h"
+#include "utils.h"
 
 using std::cin;
 using std::cout;
@@ -82,6 +82,17 @@ class centralProcessingUnit
         LDQ(0);
         DVH(1);
         cout << "TEST3: 113/25 Q = " << rgstrs.mq << " R = " << rgstrs.ac << std::endl;
+    }
+
+    /*Tests negative numbers*/
+    void NegTest1(){
+        clearCore();
+        clearRgstrs();
+        core[0] = 50;
+        core[1] = int36_unsign(-20);
+        CLA(0);
+        ADD(1);
+        cout << "TEST0: 50+(-20)=" << rgstrs.ac << std::endl;
     }
 
     private:
@@ -343,4 +354,5 @@ class centralProcessingUnit
 int main(){
     centralProcessingUnit cpu = centralProcessingUnit(true);
     cpu.FiPA_Test1();
+    cpu.NegTest1();
 }
