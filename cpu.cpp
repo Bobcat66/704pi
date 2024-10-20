@@ -96,7 +96,7 @@ class centralProcessingUnit
     void kbitTest(){
         //gKthBitTest
         uint36 testWord = 0b110101101101001001001011101011010110;
-        cout << getKthBit(testWord,11) << getKthBit(testWord,10) << getKthBit(testWord,9) << getKthBit(testWord,8) << getKthBit(testWord,7) << getKthBit(testWord,6) << getKthBit(testWord,5) << getKthBit(testWord,4) << getKthBit(testWord,3) << getKthBit(testWord,2) << getKthBit(testWord,1) << getKthBit(testWord,0) << std::endl; //Should print "10"
+        cout << getKthBit(testWord,11) << getKthBit(testWord,10) << getKthBit(testWord,9) << getKthBit(testWord,8) << getKthBit(testWord,7) << getKthBit(testWord,6) << getKthBit(testWord,5) << getKthBit(testWord,4) << getKthBit(testWord,3) << getKthBit(testWord,2) << getKthBit(testWord,1) << getKthBit(testWord,0) << std::endl; //Should print "101011010110"
     }
 
     private:
