@@ -250,7 +250,6 @@ class centralProcessingUnit
         uint36 cmqS1_17 = rgstrs.mq/((uint36)1 << 18);
         cy %= ((uint36)1 << 18);
         core[y] = (cmqS1_17 << 18) + cy;
-        cout << core[y] << '\n';
     }
 
     /*Replaces cy(S,1-2) with cac (P,1-2). Octal: +0630*/
@@ -382,6 +381,7 @@ class centralProcessingUnit
 
 int main(){
     centralProcessingUnit cpu = centralProcessingUnit(true);
+    cout << "Running tests\n";
     cpu.FiPA_Test1();
     cpu.NegTest1();
     cpu.kbitTest();
