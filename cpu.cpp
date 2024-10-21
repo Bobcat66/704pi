@@ -96,7 +96,14 @@ class centralProcessingUnit
     void kbitTest(){
         //gKthBitTest
         uint36 testWord = 0b110101101101001001001011101011010110;
-        cout << getKthBit(testWord,11) << getKthBit(testWord,10) << getKthBit(testWord,9) << getKthBit(testWord,8) << getKthBit(testWord,7) << getKthBit(testWord,6) << getKthBit(testWord,5) << getKthBit(testWord,4) << getKthBit(testWord,3) << getKthBit(testWord,2) << getKthBit(testWord,1) << getKthBit(testWord,0) << std::endl; //Should print "101011010110"
+        cout << getKthBit(testWord,11) << getKthBit(testWord,10) << getKthBit(testWord,9) << getKthBit(testWord,8) << getKthBit(testWord,7) << getKthBit(testWord,6) << getKthBit(testWord,5) << getKthBit(testWord,4) << getKthBit(testWord,3) << getKthBit(testWord,2) << getKthBit(testWord,1) << getKthBit(testWord,0) << std::endl; //Should print "10"
+        clearCore();
+        clearRgstrs();
+        core[0] = (uint36)0b111111111111111111111111111111111111;
+        core[1] = (uint36)0b000000000000000000000000000000000000;
+        LDQ(0);
+        SLQ(1);
+        cout << core[1];
     }
 
     private:
@@ -242,7 +249,8 @@ class centralProcessingUnit
         uint36 cy = core[y];
         uint36 cmqS1_17 = rgstrs.mq/((uint36)1 << 18);
         cy %= ((uint36)1 << 18);
-        core[y] = cmqS1_17 | cy;
+        core[y] = (cmqS1_17 << 18) + cy;
+        cout << core[y] << '\n';
     }
 
     /*Replaces cy(S,1-2) with cac (P,1-2). Octal: +0630*/
