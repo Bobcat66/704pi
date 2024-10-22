@@ -103,7 +103,7 @@ class centralProcessingUnit
         core[1] = (uint36)0b000000000000000000000000000000000000;
         LDQ(0);
         SLQ(1);
-        cout << core[1];
+        cout << core[1] << std::endl;
     }
 
     private:
