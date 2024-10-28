@@ -2,10 +2,14 @@
 #include <cstdint>
 #include <fstream>
 #include <cmath>
+#include <bitset>
 #include "utils.h"
 
 using std::cin;
 using std::cout;
+
+using bits36 = std::bitset<36>;
+using bits38 = std::bitset<38>;
 
 struct registers
 {
@@ -103,7 +107,26 @@ class centralProcessingUnit
         core[1] = (uint36)0b000000000000000000000000000000000000;
         LDQ(0);
         SLQ(1);
-        cout << core[1] << std::endl;
+        cout << bits36(core[1]) << std::endl;
+        clearCore();
+        clearRgstrs();
+        core[0] = (uint36)0b111111111111111111111111111111111111;
+        cout << "CORE0 " << bits36(core[0]) << std::endl;
+        STP(0);
+        cout << "CORE0 " << bits36(core[0]) << std::endl;
+        clearCore();
+        clearRgstrs();
+        core[0] = (uint36)0b111000000000000000111111111111111111;
+        rgstrs.ac = (uint38)0b11111111111111111111111111111111111111;
+        cout << "CORE0 " << bits36(core[0]) << std::endl;
+        STD(0);
+        cout << "CORE0 " << bits36(core[0]) << std::endl;
+        clearCore();
+        clearRgstrs();
+        rgstrs.ac = (uint38)0b11111111111111111111111111111111111111;
+        cout << "CAC " << bits38(rgstrs.ac) << std::endl;
+        CLM();
+        cout << "CAC " << bits38(rgstrs.ac) << std::endl;
     }
 
     private:
@@ -146,6 +169,29 @@ class centralProcessingUnit
     uint36 core[8192]; // Magnetic core storage, contains 8,192 36-bit registers
     std::fstream drum; // Drum storage stream
     std::fstream tape; // Tape stream
+
+    // Helper functions
+
+    /*returns cac(P,1,2)*/
+
+    inline uint36 getCacPref() {
+        return (getKthBit(rgstrs.ac,35)*4 + getKthBit(rgstrs.ac,34)*2 + getKthBit(rgstrs.ac,33));
+    }
+
+    /*returns cac(3-17)*/
+    inline uint36 getCacDec() {
+        return (rgstrs.ac % ((uint36)1 << 33))/((uint36)1 << 18);
+    }
+
+    /*returns cy(S,1,2)*/
+    inline uint36 getCyPref(uint15 y) {
+        return core[y] / ((uint36)1 << 33);
+    }
+
+    /*returns cy(3-17)*/
+    inline uint36 getCyDec(uint15 y) {
+        return (core[y] % ((uint36)1 << 33))/((uint36)1 << 18);
+    }
 
     /*Clears arithmetic registers*/
     void clearARgstrs(){
@@ -252,14 +298,25 @@ class centralProcessingUnit
         core[y] = (cmqS1_17 << 18) + cy;
     }
 
-    /*Replaces cy(S,1-2) with cac (P,1-2). Octal: +0630*/
+    /*Replaces cy(S,1-2) with cac(P,1-2). Octal: +0630*/
     void STP(uint15 y){
-        uint36 cy3_36 = core[y] / ((uint36)1 << 33);
-        uint36 cacPref = getKthBit(rgstrs.ac,35)*4 + getKthBit(rgstrs.ac,34)*2 + getKthBit(rgstrs.ac,33);
-        core[y] = cacPref | cy3_36;
+        uint36 cy3_36 = core[y] % ((uint36)1 << 33);
+        uint36 cacPref = getCacPref();
+        core[y] = cacPref + cy3_36;
     }
 
-
+    /*Replaces cy(3-17) with cac(3-17)*/
+    void STD(uint15 y){
+        uint36 cyPref = getCyPref(y) << 33;
+        uint36 cacDec = getCacDec() << 18;
+        uint36 cy18End = core[y]%((uint36)1 << 18);
+        core[y] = cyPref + cacDec + cy18End;
+    }
+    /*Clears magnitude of ac. The sign bit is unaffected*/
+    void CLM(){
+        uint38 signbit = getKthBit(rgstrs.ac,37) << 37;
+        rgstrs.ac = signbit;
+    }
     /*Fixed-Point Arithmetic Instructions*/
 
     /*Adds cy to cac, stores the sum in ac. Octal: +0400*/
@@ -332,7 +389,6 @@ class centralProcessingUnit
         MPY(y);
         RND();
     }
-
     /*Uses cmq and cac as a 72-bit dividend with sign, treats cy as the divisor. 
     If cy > cac, division takes place, and the 35-bit signed quotient is stored in mq,
     while the 35-bit signed remainder is stored in ac. The sign of the remainder always
