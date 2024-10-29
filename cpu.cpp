@@ -127,6 +127,25 @@ class centralProcessingUnit
         cout << "CAC " << bits38(rgstrs.ac) << std::endl;
         CLM();
         cout << "CAC " << bits38(rgstrs.ac) << std::endl;
+        clearCore();
+        clearRgstrs();
+        core[0] = 0b111111111111111111111111111111111111;
+        STA(0);
+        cout << "CORE0 " << bits36(core[0]) << std::endl;
+        clearCore();
+        clearRgstrs();
+        rgstrs.ac = 0b10000000000000000000000000000000000000;
+        cout << "CORE0 " << bits38(rgstrs.ac) << std::endl;
+        CHS();
+        cout << "CORE0 " << bits38(rgstrs.ac) << std::endl;
+        CHS();
+        cout << "CORE0 " << bits38(rgstrs.ac) << std::endl;
+        SSM();
+        cout << "CORE0 " << bits38(rgstrs.ac) << std::endl;
+        SSP();
+        cout << "CORE0 " << bits38(rgstrs.ac) << std::endl;
+        clearCore();
+        clearRgstrs();
     }
 
     private:
@@ -191,6 +210,16 @@ class centralProcessingUnit
     /*returns cy(3-17)*/
     inline uint36 getCyDec(uint15 y) {
         return (core[y] % ((uint36)1 << 33))/((uint36)1 << 18);
+    }
+
+    /*returns cy(21-35)*/
+    inline uint36 getCyAdd(uint15 y) {
+        return (core[y] % ((uint36)1 << 15));
+    }
+
+    /*returns cac(21-35)*/
+    inline uint36 getCacAdd() {
+        return (rgstrs.ac % ((uint36)1 << 15));
     }
 
     /*Clears arithmetic registers*/
@@ -312,11 +341,41 @@ class centralProcessingUnit
         uint36 cy18End = core[y]%((uint36)1 << 18);
         core[y] = cyPref + cacDec + cy18End;
     }
+
+    /*Replaces cy(21-35) with cac(21-35)*/
+    void STA(uint15 y){
+        uint36 cyS120 = (core[y] / (1 << 15)) << 15;
+        uint36 cacAdd = getCacAdd();
+        core[y] = cyS120 + cacAdd;
+    }
+
     /*Clears magnitude of ac. The sign bit is unaffected*/
     void CLM(){
         uint38 signbit = getKthBit(rgstrs.ac,37) << 37;
         rgstrs.ac = signbit;
     }
+
+    /*Flips sign bit of AC*/
+    void CHS(){
+        uint38 signbit = getKthBit(rgstrs.ac,37);
+        rgstrs.ac = signbit ? clearKthBit(rgstrs.ac,37) : setKthBit(rgstrs.ac,37);
+    }
+
+    /*Sets sign of AC to positive*/
+    void SSP(){
+        rgstrs.ac = setKthBit(rgstrs.ac,37);
+    }
+
+    /*Sets sign of AC to negative*/
+    void SSM(){
+        rgstrs.ac = clearKthBit(rgstrs.ac,37);
+    }
+
+    /*Stores cy(S,1-35) in ac(P,1-35). S and Q bits of ac are cleared*/
+    void CAL(uint15 y){
+        rgstrs.ac = core[y];
+    }
+
     /*Fixed-Point Arithmetic Instructions*/
 
     /*Adds cy to cac, stores the sum in ac. Octal: +0400*/
@@ -349,6 +408,7 @@ class centralProcessingUnit
         uint36 cy = core[y];
         uint38 res = toggleKthBit((getKthBit(cy,35) << 37) + clearKthBit(cy,35),37);
         rgstrs.ac = res;
+
     }
 
     /*Subtracts cy from cac, stores difference in ac. Octal: +0402*/
