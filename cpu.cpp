@@ -135,17 +135,39 @@ class centralProcessingUnit
         clearCore();
         clearRgstrs();
         rgstrs.ac = 0b10000000000000000000000000000000000000;
-        cout << "CORE0 " << bits38(rgstrs.ac) << std::endl;
+        cout << "CAC " << bits38(rgstrs.ac) << std::endl;
         CHS();
-        cout << "CORE0 " << bits38(rgstrs.ac) << std::endl;
+        cout << "CAC " << bits38(rgstrs.ac) << std::endl;
         CHS();
-        cout << "CORE0 " << bits38(rgstrs.ac) << std::endl;
+        cout << "CAC " << bits38(rgstrs.ac) << std::endl;
         SSM();
-        cout << "CORE0 " << bits38(rgstrs.ac) << std::endl;
+        cout << "CAC " << bits38(rgstrs.ac) << std::endl;
         SSP();
-        cout << "CORE0 " << bits38(rgstrs.ac) << std::endl;
+        cout << "CAC " << bits38(rgstrs.ac) << std::endl;
         clearCore();
         clearRgstrs();
+    }
+
+    /*Tests logical operations*/
+    void logicTest() {
+        rgstrs.ac = 0b11111111111111111111111111111111111111;
+        core[0] = 0b111111111111111111111111111111111111;
+        CAL(0);
+        cout << "CAC " << bits38(rgstrs.ac) << std::endl;
+        clearCore();
+        clearRgstrs();
+        rgstrs.ac = 0b00111111111111111111111111111111111111;
+        core[0] = 0b111111111111111111111111111111111111;
+        ACL(0);
+        cout << "CAC " << bits38(rgstrs.ac) << std::endl;
+        rgstrs.ac = 0b10111111111111111111111111111111111111;
+        core[0] = 0b111111111111111111111111111111111111;
+        ACL(0);
+        cout << "CAC " << bits38(rgstrs.ac) << std::endl;
+        rgstrs.ac = 0b11111111111111111111111111111111111111;
+        core[0] = 0b111111111111111111111111111111111111;
+        ACL(0);
+        cout << "CAC " << bits38(rgstrs.ac) << std::endl;
     }
 
     private:
@@ -376,6 +398,19 @@ class centralProcessingUnit
         rgstrs.ac = core[y];
     }
 
+    /*Adds CAC(P,1-35) to CY(S,1,35), and stores the value in Y. The sign of CAC is ignored, and the sign bit of CY is treated as a numerical bit. Overflow wraps around to least significant bit. No overflow is possible.
+    The sum is stored in AC(P,1-35) CAC(P) and CAC(S) are unchanged*/
+    void ACL(uint15 y){
+        uint38 cacp = getKthBit(rgstrs.ac,35);
+        uint36 cys = getKthBit(rgstrs.ac,35);
+        uint36 sum = ((((rgstrs.ac)%((uint38)1 << 36)) + core[y])%((uint36)1 << 36));
+        if (cacp && cys) {
+            sum += 1;
+        }
+        rgstrs.ac = ((rgstrs.ac / ((uint38)1 << 36)) << 36) + sum;
+    }
+    
+
     /*Fixed-Point Arithmetic Instructions*/
 
     /*Adds cy to cac, stores the sum in ac. Octal: +0400*/
@@ -501,4 +536,5 @@ int main(){
     cpu.FiPA_Test1();
     cpu.NegTest1();
     cpu.kbitTest();
+    cpu.logicTest();
 }
